@@ -1,8 +1,8 @@
 package io.github.socraticphoenix.jamfx.event;
 
 
-@java.lang.annotation.Retention(value = java.lang.annotation.RetentionPolicy.RUNTIME)
 @io.github.socraticphoenix.jamfx.event.FXScene.$_0
+@java.lang.annotation.Retention(value = java.lang.annotation.RetentionPolicy.RUNTIME)
 public @interface FXScene {
 
     @java.lang.annotation.Retention(value = java.lang.annotation.RetentionPolicy.RUNTIME)

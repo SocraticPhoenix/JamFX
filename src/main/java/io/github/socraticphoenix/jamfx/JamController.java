@@ -1,24 +1,38 @@
 package io.github.socraticphoenix.jamfx;
 
 import com.gmail.socraticphoenix.collect.coupling.Pair;
-import io.github.socraticphoenix.jamfx.event.JamListenerUtil;
-import javafx.event.EventType;
+import io.github.socraticphoenix.jamfx.event.predicate.AlwaysTruePredicate;
+import io.github.socraticphoenix.jamfx.event.predicate.FieldPredicated;
+import io.github.socraticphoenix.jamfx.event.Jam;
+import io.github.socraticphoenix.occurence.generator.WrapperPolicyRegistry;
+import io.github.socraticphoenix.occurence.generator.reflection.ReflectionWrapperGenerator;
+import io.github.socraticphoenix.occurence.manager.EventManager;
+import io.github.socraticphoenix.occurence.manager.SimpleEventManager;
+import io.github.socraticphoenix.occurence.manager.SynchronizedEventManager;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import lombok.Getter;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
 public abstract class JamController {
     @Getter private JamProperties properties;
     @Getter private Scene scene;
+
+    private EventManager<Event> manager;
+    private ReflectionWrapperGenerator<Event> generator;
 
     public JamController(JamProperties properties, Scene scene) {
         this.properties = properties;
@@ -30,7 +44,35 @@ public abstract class JamController {
     }
 
     public void init() {
-        JamListenerUtil.apply(this);
+        ReflectionWrapperGenerator<Event> generator = new ReflectionWrapperGenerator<>(new WrapperPolicyRegistry(), Event.class);
+        generator.getRegistry().registerDefaults();
+        this.manager = new SynchronizedEventManager<>(new SimpleEventManager<>(generator));
+        this.generator = generator;
+
+        for (Field field : this.getClass().getDeclaredFields()) {
+            if (field.isAnnotationPresent(Jam.class)) {
+                field.setAccessible(true);
+                try {
+                    Object val = field.get(this);
+                    EventHandler<Event> handler = this.manager::postSafely;
+
+                    if (val instanceof Node) {
+                        ((Node) val).addEventHandler(Event.ANY, handler);
+                    } else if (val instanceof Window) {
+                        ((Window) val).addEventHandler(Event.ANY, handler);
+                    } else if (val instanceof Scene) {
+                        ((Scene) val).addEventHandler(Event.ANY, handler);
+                    }
+                } catch (IllegalAccessException e) {
+                    throw new JamLoadException("Unable to access Jam annotated field: " + field.getName(), e);
+                }
+
+                generator.policies().registerPredicate(field.getName(), new FieldPredicated(field, this));
+            }
+        }
+        generator.policies().registerPredicate("<always_true>", new AlwaysTruePredicate());
+
+        this.manager.register(this);
     }
 
     public <T extends JamController> Pair<T, Stage> popup(String name) {

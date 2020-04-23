@@ -1,40 +1,69 @@
 {
   "package": "io.github.socraticphoenix.jamfx.event",
-  "annotations": [{
-    "expans": [
-      {
-        "args": [
-          {
-            "val": "\"getSource\"",
-            "name": "value",
-          },
-          {
-            "name": "args",
-          }
-        ],
-        "type": "io.github.socraticphoenix.occurence.annotation.Filter$Invoke"
-      },
-      {
-        "args": [{
-          "val": "{javafx.scene.Node.class}",
-          "name": "value",
-        }],
-        "type": "io.github.socraticphoenix.occurence.annotation.Filter$Include"
-      },
-      {
-        "args": [
-          {
-            "val": "\"getScene\"",
-            "name": "value",
-          },
-          {
-            "name": "args",
-          }
-        ],
-        "type": "io.github.socraticphoenix.occurence.annotation.Filter$Invoke"
-      }
-    ],
-    "name": "FXScene",
-    "params": []
-  }]
+  "annotations": [
+    {
+      "expans": [
+        {
+          "args": [
+            {
+              "val": "\"getSource\"",
+              "name": "value"
+            },
+            {"name": "args"}
+          ],
+          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Invoke"
+        },
+        {
+          "args": [{
+            "val": "{javafx.scene.Node.class}",
+            "name": "value"
+          }],
+          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Include"
+        },
+        {
+          "args": [
+            {
+              "val": "\"getScene\"",
+              "name": "value"
+            },
+            {"name": "args"}
+          ],
+          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Invoke"
+        }
+      ],
+      "name": "FXScene",
+      "params": []
+    },
+    {
+      "expans": [
+        {
+          "args": [
+            {
+              "val": "\"getSource\"",
+              "name": "value"
+            },
+            {"name": "args"}
+          ],
+          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Invoke"
+        },
+        {
+          "args": [
+            {"name": "value"},
+            {"name": "args"},
+            {
+              "name": "id",
+              "del": "value"
+            }
+          ],
+          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Predicate"
+        }
+      ],
+      "name": "FXSource",
+      "params": [{
+        "def": "\"<always_true>\"",
+        "name": "value",
+        "type": "java.lang.String"
+      }]
+    }
+  ]
 }
