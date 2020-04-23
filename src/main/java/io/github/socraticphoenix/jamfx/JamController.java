@@ -43,6 +43,10 @@ public abstract class JamController {
         this(new JamProperties(), scene);
     }
 
+    public void refresh() {
+        this.properties.get(JamProperty.PARENT_CONTROLLER, JamController.class).ifPresent(JamController::refresh);
+    }
+
     public void init() {
         ReflectionWrapperGenerator<Event> generator = new ReflectionWrapperGenerator<>(new WrapperPolicyRegistry(), Event.class);
         generator.getRegistry().registerDefaults();
@@ -76,7 +80,7 @@ public abstract class JamController {
     }
 
     public <T extends JamController> Pair<T, Stage> popup(String name) {
-        return this.popup(name, Modality.APPLICATION_MODAL, this.properties);
+        return this.popup(name, Modality.APPLICATION_MODAL, this.properties.copy().put(JamProperty.PARENT_CONTROLLER, this));
     }
 
     public <T extends JamController> Pair<T, Stage> popup(String name, Modality modality, JamProperties properties) {
