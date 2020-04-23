@@ -15,17 +15,7 @@ repositories {
 
 dependencies {
     implementation(
-            'com.jfoenix:jfoenix:9.0.9',
-
-            'org.slf4j:slf4j-api:1.7.30',
-            'org.slf4j:slf4j-simple:1.7.30',
-
-            'com.github.SocraticPhoenix:Collect:master-SNAPSHOT',
-            'com.github.SocraticPhoenix:Mirror:master-SNAPSHOT',
-            'com.github.SocraticPhoenix:Occurence:master-SNAPSHOT',
-
-            'org.ow2.asm:asm-debug-all:5.2',
-            'com.github.SocraticPhoenix:ASMSignatures:master-SNAPSHOT'
+            'com.github.SocraticPhoenix:Occurence:master-SNAPSHOT'
     )
 
     testImplementation(

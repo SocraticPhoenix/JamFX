@@ -1,6 +1,5 @@
 package io.github.socraticphoenix.jamfx;
 
-import com.gmail.socraticphoenix.collect.coupling.Pair;
 import io.github.socraticphoenix.jamfx.event.predicate.AlwaysTruePredicate;
 import io.github.socraticphoenix.jamfx.event.predicate.FieldPredicated;
 import io.github.socraticphoenix.jamfx.event.Jam;
@@ -19,6 +18,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import javafx.util.Pair;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -92,9 +92,9 @@ public abstract class JamController {
         newStage.initOwner(this.scene.getWindow());
 
         Pair<T, Pane> loaded = load(name, scene, properties);
-        scene.setRoot(loaded.getB());
+        scene.setRoot(loaded.getValue());
 
-        return Pair.of(loaded.getA(), newStage);
+        return new Pair<>(loaded.getKey(), newStage);
     }
 
     public <T extends JamController> T switchView(String name) {
@@ -103,8 +103,8 @@ public abstract class JamController {
 
     public <T extends JamController> T switchView(String name, JamProperties properties) {
         Pair<T, Pane> loaded = load(name, this.scene, properties);
-        this.scene.setRoot(loaded.getB());
-        return loaded.getA();
+        this.scene.setRoot(loaded.getValue());
+        return loaded.getKey();
     }
 
     public <T extends JamController> Pair<T, Pane> load(String name, Scene scene, JamProperties properties) {
@@ -117,9 +117,9 @@ public abstract class JamController {
         newStage.setScene(scene);
 
         Pair<T, Pane> loaded = load(fxml, scene, properties);
-        scene.setRoot(loaded.getB());
+        scene.setRoot(loaded.getValue());
 
-        return Pair.of(loaded.getA(), newStage);
+        return new Pair<>(loaded.getKey(), newStage);
     }
 
     public static <T extends JamController> Pair<T, Pane> load(URL fxml, Scene scene, JamProperties properties) {
@@ -146,7 +146,7 @@ public abstract class JamController {
             Pane root = loader.load();
             T controller = loader.getController();
             controller.init();
-            return Pair.of(controller, root);
+            return new Pair<>(controller, root);
         } catch (IOException e) {
             throw new JamLoadException("Failed to load FXML: " + fxml, e);
         }

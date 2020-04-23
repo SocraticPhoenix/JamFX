@@ -13,6 +13,6 @@ public class TestHelloWorld extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        JamController.loadStage(getClass().getResource("helloWorld.fxml"), new JamProperties()).getB().show();
+        JamController.loadStage(getClass().getResource("helloWorld.fxml"), new JamProperties()).getValue().show();
     }
 }
