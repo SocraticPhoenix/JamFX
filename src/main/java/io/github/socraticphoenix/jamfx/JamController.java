@@ -80,10 +80,14 @@ public abstract class JamController {
     }
 
     public <T extends JamController> Pair<T, Stage> popup(String name) {
-        return this.popup(name, Modality.APPLICATION_MODAL, this.properties.copy().put(JamProperty.PARENT_CONTROLLER, this));
+        return this.popup(name, Modality.APPLICATION_MODAL, this.makePopupProperties());
     }
 
     public <T extends JamController> Pair<T, Stage> popup(String name, Modality modality, JamProperties properties) {
+        return this.popup(getClass().getResource(name), modality, properties);
+    }
+
+    public <T extends JamController> Pair<T, Stage> popup(URL fxml, Modality modality, JamProperties properties) {
         Stage newStage = new Stage();
         Scene scene = new Scene(new AnchorPane());
         newStage.setScene(scene);
@@ -91,24 +95,39 @@ public abstract class JamController {
         newStage.initModality(modality);
         newStage.initOwner(this.scene.getWindow());
 
-        Pair<T, Pane> loaded = load(name, scene, properties);
+        Pair<T, Pane> loaded = load(fxml, scene, properties);
         scene.setRoot(loaded.getValue());
 
         return new Pair<>(loaded.getKey(), newStage);
     }
 
     public <T extends JamController> T switchView(String name) {
-        return this.switchView(name, this.properties);
+        return this.switchView(name, this.makeChildProperties());
     }
 
     public <T extends JamController> T switchView(String name, JamProperties properties) {
-        Pair<T, Pane> loaded = load(name, this.scene, properties);
+        return this.switchView(getClass().getResource(name), properties);
+    }
+
+
+    public <T extends JamController> T switchView(URL fxml, JamProperties properties) {
+        Pair<T, Pane> loaded = load(fxml, this.scene, properties);
         this.scene.setRoot(loaded.getValue());
         return loaded.getKey();
     }
 
-    public <T extends JamController> Pair<T, Pane> load(String name, Scene scene, JamProperties properties) {
-        return this.load(getClass().getResource(name), scene, properties);
+    public JamProperties makeChildProperties() {
+        JamProperties properties = this.properties.copy();
+        properties.put(JamProperty.PREVIOUS_CONTROLLER, this);
+        properties.put(JamProperty.PREVIOUS_PROPERTIES, this.properties);
+
+        this.properties.get(JamProperty.URL).ifPresent(u -> properties.put(JamProperty.PREVIOUS_URL, u));
+
+        return properties;
+    }
+
+    public JamProperties makePopupProperties() {
+        return makeChildProperties().put(JamProperty.PARENT_CONTROLLER, this);
     }
 
     public static <T extends JamController> Pair<T, Stage> loadStage(URL fxml, JamProperties properties) {
@@ -125,10 +144,12 @@ public abstract class JamController {
     public static <T extends JamController> Pair<T, Pane> load(URL fxml, Scene scene, JamProperties properties) {
         try {
             FXMLLoader loader = new FXMLLoader(fxml);
+            properties = properties.copy().put(JamProperty.URL, fxml);
+            JamProperties finalProperties = properties;
             loader.setControllerFactory(cls -> {
                 try {
                     Constructor<?> cons = cls.getConstructor(JamProperties.class, Scene.class);
-                    return cons.newInstance(properties, scene);
+                    return cons.newInstance(finalProperties, scene);
                 } catch (NoSuchMethodException e) {
                     try {
                         Constructor<?> cons2 = cls.getConstructor(Scene.class);
