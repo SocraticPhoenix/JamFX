@@ -1,13 +1,15 @@
 package io.github.socraticphoenix.jamfx;
 
-import io.github.socraticphoenix.jamfx.event.predicate.AlwaysTruePredicate;
-import io.github.socraticphoenix.jamfx.event.predicate.FieldPredicated;
 import io.github.socraticphoenix.jamfx.event.Jam;
-import io.github.socraticphoenix.occurence.generator.WrapperPolicyRegistry;
-import io.github.socraticphoenix.occurence.generator.reflection.ReflectionWrapperGenerator;
-import io.github.socraticphoenix.occurence.manager.EventManager;
-import io.github.socraticphoenix.occurence.manager.SimpleEventManager;
-import io.github.socraticphoenix.occurence.manager.SynchronizedEventManager;
+import io.github.socraticphoenix.jamfx.event.predicate.FieldPredicated;
+import io.github.socraticphoenix.occurrence.generator.WrapperPolicyRegistry;
+import io.github.socraticphoenix.occurrence.generator.reflection.ReflectionWrapperGenerator;
+import io.github.socraticphoenix.occurrence.manager.EventManager;
+import io.github.socraticphoenix.occurrence.manager.dispatch.SimpleEventDispatch;
+import io.github.socraticphoenix.occurrence.manager.dispatch.SynchronizedEventDispatch;
+import io.github.socraticphoenix.occurrence.manager.listener.EventListeners;
+import io.github.socraticphoenix.occurrence.manager.listener.SimpleEventListeners;
+import io.github.socraticphoenix.occurrence.manager.listener.SynchronizedEventListeners;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -25,22 +27,21 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public abstract class JamController {
     @Getter private JamProperties properties;
     @Getter private Scene scene;
+    @Getter private JamEnvironment environment;
 
-    private EventManager<Event> manager;
-    private ReflectionWrapperGenerator<Event> generator;
-
-    public JamController(JamProperties properties, Scene scene) {
+    public JamController(JamEnvironment environment, JamProperties properties, Scene scene) {
         this.properties = properties;
         this.scene = scene;
-    }
-
-    public JamController(Scene scene) {
-        this(new JamProperties(), scene);
+        this.environment = environment;
     }
 
     public void refresh() {
@@ -48,36 +49,52 @@ public abstract class JamController {
     }
 
     public void init() {
-        ReflectionWrapperGenerator<Event> generator = new ReflectionWrapperGenerator<>(new WrapperPolicyRegistry(), Event.class);
+        WrapperPolicyRegistry policies = new WrapperPolicyRegistry();
+        ReflectionWrapperGenerator<Event> generator = new ReflectionWrapperGenerator<>(Event.class);
         generator.getRegistry().registerDefaults();
-        this.manager = new SynchronizedEventManager<>(new SimpleEventManager<>(generator));
-        this.generator = generator;
 
-        for (Field field : this.getClass().getDeclaredFields()) {
-            if (field.isAnnotationPresent(Jam.class)) {
+        EventListeners<Event> listeners = new SynchronizedEventListeners<>(this.environment, new SimpleEventListeners(generator, policies));
+        EventManager<Event> manager = new EventManager<>(new SynchronizedEventDispatch<>(this.environment, new SimpleEventDispatch<>()), listeners);
+
+        List<Field> targets = new ArrayList<>();
+        discoverFields(getClass(), f -> {
+            if (f.isAnnotationPresent(Jam.class) && policies.predicateFor(f.getName()).isEmpty()) {
+                policies.registerPredicate(f.getName(), new FieldPredicated(f, this));
+                targets.add(f);
+            }
+        });
+
+        for (Field field : targets) {
+            try {
                 field.setAccessible(true);
-                try {
-                    Object val = field.get(this);
-                    EventHandler<Event> handler = this.manager::postSafely;
+                Object val = field.get(this);
+                EventHandler<Event> handler = manager::post;
 
-                    if (val instanceof Node) {
-                        ((Node) val).addEventHandler(Event.ANY, handler);
-                    } else if (val instanceof Window) {
-                        ((Window) val).addEventHandler(Event.ANY, handler);
-                    } else if (val instanceof Scene) {
-                        ((Scene) val).addEventHandler(Event.ANY, handler);
-                    }
-                } catch (IllegalAccessException e) {
-                    throw new JamLoadException("Unable to access Jam annotated field: " + field.getName(), e);
+                if (val instanceof Node) {
+                    ((Node) val).addEventHandler(Event.ANY, handler);
+                } else if (val instanceof Window) {
+                    ((Window) val).addEventHandler(Event.ANY, handler);
+                } else if (val instanceof Scene) {
+                    ((Scene) val).addEventHandler(Event.ANY, handler);
                 }
-
-                generator.policies().registerPredicate(field.getName(), new FieldPredicated(field, this));
+            } catch (IllegalAccessException e) {
+                throw new JamLoadException("Unable to access Jam annotated field: " + field.getName(), e);
             }
         }
-        generator.policies().registerPredicate("<always_true>", new AlwaysTruePredicate());
 
-        this.manager.register(this);
+        listeners.add(this);
+        this.environment.add(listeners);
     }
+
+    private void discoverFields(Class<?> cls, Consumer<Field> consumer) {
+        if (cls != null) {
+            for (Field field : cls.getDeclaredFields()) {
+                consumer.accept(field);
+            }
+            discoverFields(cls.getSuperclass(), consumer);
+        }
+    }
+
 
     public <T extends JamController> Pair<T, Stage> popup(String name) {
         return this.popup(name, Modality.APPLICATION_MODAL, this.makePopupProperties());
@@ -95,7 +112,7 @@ public abstract class JamController {
         newStage.initModality(modality);
         newStage.initOwner(this.scene.getWindow());
 
-        Pair<T, Pane> loaded = load(fxml, scene, properties);
+        Pair<T, Pane> loaded = load(fxml, scene, this.environment, properties);
         scene.setRoot(loaded.getValue());
 
         return new Pair<>(loaded.getKey(), newStage);
@@ -111,7 +128,7 @@ public abstract class JamController {
 
 
     public <T extends JamController> T switchView(URL fxml, JamProperties properties) {
-        Pair<T, Pane> loaded = load(fxml, this.scene, properties);
+        Pair<T, Pane> loaded = load(fxml, this.scene, this.environment, properties);
         this.scene.setRoot(loaded.getValue());
         return loaded.getKey();
     }
@@ -130,36 +147,28 @@ public abstract class JamController {
         return makeChildProperties().put(JamProperty.PARENT_CONTROLLER, this);
     }
 
-    public static <T extends JamController> Pair<T, Stage> loadStage(URL fxml, JamProperties properties) {
+    public static <T extends JamController> Pair<T, Stage> loadStage(URL fxml,  JamEnvironment environment, JamProperties properties) {
         Stage newStage = new Stage();
         Scene scene = new Scene(new AnchorPane());
         newStage.setScene(scene);
 
-        Pair<T, Pane> loaded = load(fxml, scene, properties);
+        Pair<T, Pane> loaded = load(fxml, scene, environment, properties);
         scene.setRoot(loaded.getValue());
 
         return new Pair<>(loaded.getKey(), newStage);
     }
 
-    public static <T extends JamController> Pair<T, Pane> load(URL fxml, Scene scene, JamProperties properties) {
+    public static <T extends JamController> Pair<T, Pane> load(URL fxml, Scene scene, JamEnvironment environment, JamProperties properties) {
         try {
             FXMLLoader loader = new FXMLLoader(fxml);
             properties = properties.copy().put(JamProperty.URL, fxml);
             JamProperties finalProperties = properties;
             loader.setControllerFactory(cls -> {
                 try {
-                    Constructor<?> cons = cls.getConstructor(JamProperties.class, Scene.class);
-                    return cons.newInstance(finalProperties, scene);
+                    Constructor<?> cons = cls.getConstructor(JamEnvironment.class, JamProperties.class, Scene.class);
+                    return cons.newInstance(environment, finalProperties, scene);
                 } catch (NoSuchMethodException e) {
-                    try {
-                        Constructor<?> cons2 = cls.getConstructor(Scene.class);
-                        return cons2.newInstance(scene);
-                    } catch (NoSuchMethodException
-                            | IllegalAccessException
-                            | InstantiationException
-                            | InvocationTargetException ex) {
-                        throw new RuntimeException("Failed to call (Scene) constructor", ex);
-                    }
+                    throw new RuntimeException("Required constructor does not exist: (JamEnvironment, JamProperties, Scene)", e);
                 } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
                     throw new RuntimeException("Failed to call (JamProperties, Scene) constructor", e);
                 }

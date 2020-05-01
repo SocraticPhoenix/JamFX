@@ -1,6 +1,7 @@
 package tests.io.github.socraticphoenix.jamfx;
 
 import io.github.socraticphoenix.jamfx.JamController;
+import io.github.socraticphoenix.jamfx.JamEnvironment;
 import io.github.socraticphoenix.jamfx.JamProperties;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -13,6 +14,7 @@ public class TestHelloWorld extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        JamController.loadStage(getClass().getResource("helloWorld.fxml"), new JamProperties()).getValue().show();
+        JamController.loadStage(getClass().getResource("helloWorld.fxml"), new JamEnvironment(), new JamProperties()).getValue().show();
     }
+
 }

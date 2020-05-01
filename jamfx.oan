@@ -11,14 +11,14 @@
             },
             {"name": "args"}
           ],
-          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Invoke"
+          "type": "io.github.socraticphoenix.occurrence.annotation.Filter$Invoke"
         },
         {
           "args": [{
             "val": "{javafx.scene.Node.class}",
             "name": "value"
           }],
-          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Include"
+          "type": "io.github.socraticphoenix.occurrence.annotation.Filter$Include"
         },
         {
           "args": [
@@ -28,7 +28,7 @@
             },
             {"name": "args"}
           ],
-          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Invoke"
+          "type": "io.github.socraticphoenix.occurrence.annotation.Filter$Invoke"
         }
       ],
       "name": "FXScene",
@@ -44,7 +44,7 @@
             },
             {"name": "args"}
           ],
-          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Invoke"
+          "type": "io.github.socraticphoenix.occurrence.annotation.Filter$Invoke"
         },
         {
           "args": [
@@ -55,7 +55,7 @@
               "del": "value"
             }
           ],
-          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Predicate"
+          "type": "io.github.socraticphoenix.occurrence.annotation.Filter$Predicate"
         }
       ],
       "name": "FXSource",
@@ -75,14 +75,14 @@
             },
             {"name": "args"}
           ],
-          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Invoke"
+          "type": "io.github.socraticphoenix.occurrence.annotation.Filter$Invoke"
         },
         {
           "args": [{
             "val": "{javafx.scene.Node.class}",
             "name": "value"
           }],
-          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Include"
+          "type": "io.github.socraticphoenix.occurrence.annotation.Filter$Include"
         },
         {
           "args": [
@@ -92,7 +92,7 @@
             },
             {"name": "args"}
           ],
-          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Invoke"
+          "type": "io.github.socraticphoenix.occurrence.annotation.Filter$Invoke"
         },
         {
           "args": [
@@ -102,14 +102,14 @@
             },
             {"name": "args"}
           ],
-          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Invoke"
+          "type": "io.github.socraticphoenix.occurrence.annotation.Filter$Invoke"
         },
         {
           "args": [{
             "val": "{javafx.stage.Stage.class}",
             "name": "value"
           }],
-          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Include"
+          "type": "io.github.socraticphoenix.occurrence.annotation.Filter$Include"
         }
       ],
       "name": "FXStage",
@@ -125,14 +125,14 @@
             },
             {"name": "args"}
           ],
-          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Invoke"
+          "type": "io.github.socraticphoenix.occurrence.annotation.Filter$Invoke"
         },
         {
           "args": [{
             "val": "{javafx.scene.Node.class}",
             "name": "value"
           }],
-          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Include"
+          "type": "io.github.socraticphoenix.occurrence.annotation.Filter$Include"
         },
         {
           "args": [
@@ -142,7 +142,7 @@
             },
             {"name": "args"}
           ],
-          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Invoke"
+          "type": "io.github.socraticphoenix.occurrence.annotation.Filter$Invoke"
         },
         {
           "args": [
@@ -152,7 +152,7 @@
             },
             {"name": "args"}
           ],
-          "type": "io.github.socraticphoenix.occurence.annotation.Filter$Invoke"
+          "type": "io.github.socraticphoenix.occurrence.annotation.Filter$Invoke"
         }
       ],
       "name": "FXWindow",

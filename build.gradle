@@ -13,18 +13,13 @@ repositories {
     }
 }
 
-dependencies {
-    implementation(
-            'com.github.SocraticPhoenix:Occurence:master-SNAPSHOT'
-    )
+configurations.all {
+    // Check for updates every build
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
 
-    testImplementation(
-            'org.junit.jupiter:junit-jupiter:5.6.0',
-            'org.testfx:testfx-junit5:4.0.16-alpha',
-    )
-    testRuntimeOnly(
-            'org.testfx:openjfx-monocle:jdk-11+26',
-    )
+dependencies {
+    compile 'com.github.SocraticPhoenix:Occurrence:21ebcd5c78'
 }
 
 javafx {

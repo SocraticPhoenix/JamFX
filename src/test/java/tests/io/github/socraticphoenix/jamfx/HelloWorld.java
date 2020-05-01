@@ -1,11 +1,11 @@
 package tests.io.github.socraticphoenix.jamfx;
 
 import io.github.socraticphoenix.jamfx.JamController;
+import io.github.socraticphoenix.jamfx.JamEnvironment;
 import io.github.socraticphoenix.jamfx.JamProperties;
-import io.github.socraticphoenix.jamfx.event.FXScene;
 import io.github.socraticphoenix.jamfx.event.FXSource;
 import io.github.socraticphoenix.jamfx.event.Jam;
-import io.github.socraticphoenix.occurence.annotation.Listener;
+import io.github.socraticphoenix.occurrence.annotation.Listener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -15,14 +15,13 @@ public class HelloWorld extends JamController {
 
     @FXML @Jam private Button hi;
 
-    public HelloWorld(JamProperties properties, Scene scene) {
-        super(properties, scene);
+    public HelloWorld(JamEnvironment environment, JamProperties properties, Scene scene) {
+        super(environment, properties, scene);
     }
 
     @Listener
-    public void onAction(ActionEvent event, @FXScene Scene scene, @FXSource("hi") Button object) {
-        System.out.println(scene);
-        System.out.println(object);
+    public void onAction(ActionEvent ev, @FXSource("hi") Button button) {
+        System.out.println(button);
     }
 
 }

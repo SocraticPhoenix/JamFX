@@ -1,7 +1,8 @@
 package io.github.socraticphoenix.jamfx.event.predicate;
 
-import io.github.socraticphoenix.occurence.functional.ListenerPredicate;
-import io.github.socraticphoenix.occurence.reflection.JavaType;
+
+import io.github.socraticphoenix.occurrence.functional.ListenerPredicate;
+import io.github.socraticphoenix.occurrence.reflection.JavaType;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
