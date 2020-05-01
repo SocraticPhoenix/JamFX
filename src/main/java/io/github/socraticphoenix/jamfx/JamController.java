@@ -62,6 +62,15 @@ public abstract class JamController {
                 policies.registerPredicate(f.getName(), new FieldPredicated(f, this));
                 targets.add(f);
             }
+
+            if (f.isAnnotationPresent(JamProperty.class)) {
+                f.setAccessible(true);
+                try {
+                    f.set(this, this.properties.require(f.getAnnotation(JamProperty.class).value(), f.getType()));
+                } catch (IllegalAccessException e) {
+                    throw new JamLoadException("Unable to access @JamProperty annotated field: " + f.getName(), e);
+                }
+            }
         });
 
         for (Field field : targets) {
@@ -78,7 +87,7 @@ public abstract class JamController {
                     ((Scene) val).addEventHandler(Event.ANY, handler);
                 }
             } catch (IllegalAccessException e) {
-                throw new JamLoadException("Unable to access Jam annotated field: " + field.getName(), e);
+                throw new JamLoadException("Unable to access @Jam annotated field: " + field.getName(), e);
             }
         }
 

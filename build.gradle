@@ -19,7 +19,7 @@ configurations.all {
 }
 
 dependencies {
-    compile 'com.github.SocraticPhoenix:Occurrence:21ebcd5c78'
+    compile 'com.github.SocraticPhoenix:Occurrence:master-SNAPSHOT'
 }
 
 javafx {
