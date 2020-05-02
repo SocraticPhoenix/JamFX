@@ -50,11 +50,11 @@ public abstract class JamController {
 
     public void init() {
         WrapperPolicyRegistry policies = new WrapperPolicyRegistry();
-        ReflectionWrapperGenerator<Event> generator = new ReflectionWrapperGenerator<>(Event.class);
+        ReflectionWrapperGenerator<Object> generator = new ReflectionWrapperGenerator<>(Object.class);
         generator.getRegistry().registerDefaults();
 
-        EventListeners<Event> listeners = new SynchronizedEventListeners<>(this.environment, new SimpleEventListeners(generator, policies));
-        EventManager<Event> manager = new EventManager<>(new SynchronizedEventDispatch<>(this.environment, new SimpleEventDispatch<>()), listeners);
+        EventListeners<Object> listeners = new SynchronizedEventListeners<>(this.environment, new SimpleEventListeners(generator, policies));
+        EventManager<Object> manager = new EventManager<>(new SynchronizedEventDispatch<>(this.environment, new SimpleEventDispatch<>()), listeners);
 
         List<Field> targets = new ArrayList<>();
         discoverFields(getClass(), f -> {
