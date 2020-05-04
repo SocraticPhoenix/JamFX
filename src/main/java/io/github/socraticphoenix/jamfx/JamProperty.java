@@ -15,4 +15,6 @@ public @interface JamProperty {
 
     String value();
 
+    boolean optional() default false;
+
 }

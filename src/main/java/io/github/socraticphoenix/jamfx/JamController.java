@@ -66,9 +66,16 @@ public abstract class JamController {
             if (f.isAnnotationPresent(JamProperty.class)) {
                 f.setAccessible(true);
                 try {
-                    f.set(this, this.properties.require(f.getAnnotation(JamProperty.class).value(), f.getType()));
+                    JamProperty property = f.getAnnotation(JamProperty.class);
+                    if (property.optional()) {
+                        f.set(this, this.properties.get(property.value(), f.getType()).orElse(null));
+                    } else {
+                        f.set(this, this.properties.require(property.value(), f.getType()));
+                    }
                 } catch (IllegalAccessException e) {
                     throw new JamLoadException("Unable to access @JamProperty annotated field: " + f.getName(), e);
+                } catch (JamPropertyRequiredException e) {
+                    throw new JamLoadException("Unable to set @JamProperty annotated field: " + f.getName(), e);
                 }
             }
         });
